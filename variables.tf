@@ -77,36 +77,36 @@ EOT
     name                                  = string
     offer_type                            = string
     resource_group_name                   = string
-    partition_merge_enabled               = optional(bool, false)
+    partition_merge_enabled               = optional(bool) # Default: false
     network_acl_bypass_ids                = optional(list(string))
-    network_acl_bypass_for_azure_services = optional(bool, false)
-    multiple_write_locations_enabled      = optional(bool, false)
+    network_acl_bypass_for_azure_services = optional(bool) # Default: false
+    multiple_write_locations_enabled      = optional(bool) # Default: false
     mongo_server_version                  = optional(string)
-    minimal_tls_version                   = optional(string, "Tls12")
+    minimal_tls_version                   = optional(string) # Default: "Tls12"
     managed_hsm_key_id                    = optional(string)
-    local_authentication_disabled         = optional(bool, false)
-    kind                                  = optional(string, "GlobalDocumentDB")
-    is_virtual_network_filter_enabled     = optional(bool, false)
-    public_network_access_enabled         = optional(bool, true)
+    local_authentication_disabled         = optional(bool)   # Default: false
+    kind                                  = optional(string) # Default: "GlobalDocumentDB"
+    is_virtual_network_filter_enabled     = optional(bool)   # Default: false
+    public_network_access_enabled         = optional(bool)   # Default: true
     ip_range_filter                       = optional(set(string))
-    free_tier_enabled                     = optional(bool, false)
-    default_identity_type                 = optional(string, "FirstPartyIdentity")
+    free_tier_enabled                     = optional(bool)   # Default: false
+    default_identity_type                 = optional(string) # Default: "FirstPartyIdentity"
     create_mode                           = optional(string)
-    burst_capacity_enabled                = optional(bool, false)
-    automatic_failover_enabled            = optional(bool, false)
-    analytical_storage_enabled            = optional(bool, false)
-    access_key_metadata_writes_enabled    = optional(bool, true)
+    burst_capacity_enabled                = optional(bool) # Default: false
+    automatic_failover_enabled            = optional(bool) # Default: false
+    analytical_storage_enabled            = optional(bool) # Default: false
+    access_key_metadata_writes_enabled    = optional(bool) # Default: true
     key_vault_key_id                      = optional(string)
     tags                                  = optional(map(string))
     consistency_policy = object({
       consistency_level       = string
-      max_interval_in_seconds = optional(number, 5)
-      max_staleness_prefix    = optional(number, 100)
+      max_interval_in_seconds = optional(number) # Default: 5
+      max_staleness_prefix    = optional(number) # Default: 100
     })
     geo_location = object({
       failover_priority = number
       location          = string
-      zone_redundant    = optional(bool, false)
+      zone_redundant    = optional(bool) # Default: false
     })
     analytical_storage = optional(object({
       schema_type = string
@@ -150,7 +150,7 @@ EOT
     }))
     virtual_network_rule = optional(object({
       id                                   = string
-      ignore_missing_vnet_service_endpoint = optional(bool, false)
+      ignore_missing_vnet_service_endpoint = optional(bool) # Default: false
     }))
   }))
 }
