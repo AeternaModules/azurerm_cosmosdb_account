@@ -27,6 +27,7 @@ Optional:
     - key_vault_key_id
     - kind
     - local_authentication_disabled
+    - local_authentication_enabled
     - managed_hsm_key_id
     - minimal_tls_version
     - mongo_server_version
@@ -84,7 +85,8 @@ EOT
     mongo_server_version                  = optional(string)
     minimal_tls_version                   = optional(string) # Default: "Tls12"
     managed_hsm_key_id                    = optional(string)
-    local_authentication_disabled         = optional(bool)   # Default: false
+    local_authentication_enabled          = optional(bool)
+    local_authentication_disabled         = optional(bool)
     kind                                  = optional(string) # Default: "GlobalDocumentDB"
     is_virtual_network_filter_enabled     = optional(bool)   # Default: false
     public_network_access_enabled         = optional(bool)   # Default: true
@@ -153,5 +155,176 @@ EOT
       ignore_missing_vnet_service_endpoint = optional(bool) # Default: false
     }))
   }))
+  validation {
+    condition = alltrue([
+      for k, v in var.cosmosdb_accounts : (
+        can(regex("^[-a-z0-9]{3,50}$", v.name))
+      )
+    ])
+    error_message = "Cosmos DB Account name must be 3 - 50 characters long, contain only lowercase letters, numbers and hyphens."
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.cosmosdb_accounts : (
+        v.capacity == null || (v.capacity.total_throughput_limit >= -1)
+      )
+    ])
+    error_message = "must be at least -1"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.cosmosdb_accounts : (
+        v.consistency_policy.max_interval_in_seconds == null || (v.consistency_policy.max_interval_in_seconds >= 5 && v.consistency_policy.max_interval_in_seconds <= 86400)
+      )
+    ])
+    error_message = "must be between 5 and 86400"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.cosmosdb_accounts : (
+        v.geo_location.failover_priority >= 0
+      )
+    ])
+    error_message = "must be at least 0"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.cosmosdb_accounts : (
+        v.backup == null || (v.backup.interval_in_minutes == null || (v.backup.interval_in_minutes >= 60 && v.backup.interval_in_minutes <= 1440))
+      )
+    ])
+    error_message = "must be between 60 and 1440"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.cosmosdb_accounts : (
+        v.backup == null || (v.backup.retention_in_hours == null || (v.backup.retention_in_hours >= 8 && v.backup.retention_in_hours <= 720))
+      )
+    ])
+    error_message = "must be between 8 and 720"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.cosmosdb_accounts : (
+        v.restore == null || (v.restore.database == null || (length(v.restore.database.name) > 0))
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.cosmosdb_accounts : (
+        v.restore == null || (v.restore.database == null || (v.restore.database.collection_names == null || (length(v.restore.database.collection_names) > 0)))
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  # --- Unconfirmed validation candidates, derived from azurerm_cosmosdb_account's provider source ---
+  # Not auto-enabled: either a bespoke provider validator we can't safely translate,
+  # or a path that crosses a list-typed block (needs its own for_each wrapping).
+  # Review, translate into a real validation{} block above, and delete once confirmed.
+  # path: location
+  #   source:    location.EnhancedValidate: no recognizable `if ... { errors = append(...) }` pattern - read it by hand
+  # path: resource_group_name
+  #   condition: length(value) <= 90
+  #   message:   [from resourcegroups.ValidateName: invalid when len(value) > 90]
+  #   source:    [from resourcegroups.ValidateName: invalid when len(value) > 90]
+  # path: resource_group_name
+  #   condition: !endswith(value, ".")
+  #   message:   [from resourcegroups.ValidateName: must not end with "."]
+  #   source:    [from resourcegroups.ValidateName: must not end with "."]
+  # path: resource_group_name
+  #   condition: length(value) != 0
+  #   message:   [from resourcegroups.ValidateName: invalid when len(value) == 0]
+  #   source:    [from resourcegroups.ValidateName: invalid when len(value) == 0]
+  # path: resource_group_name
+  #   source:    [from resourcegroups.ValidateName] !matched
+  # path: offer_type
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: analytical_storage.schema_type
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: minimal_tls_version
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: create_mode
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: default_identity_type
+  #   source:    validation.Any(...) - no translation rule yet, add one
+  # path: kind
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: ip_range_filter[*]
+  #   source:    validation.Any(...) - no translation rule yet, add one
+  # path: key_vault_key_id
+  #   source:    [from keyvault.ValidateNestedItemID] !ok
+  # path: key_vault_key_id
+  #   source:    [from keyvault.ValidateNestedItemID] err != nil
+  # path: consistency_policy.consistency_level
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: consistency_policy.max_staleness_prefix
+  #   source:    validation.IntBetween(10, math.MaxInt32) - bound(s) not a literal int (e.g. a named constant like math.MaxInt32) - resolve manually
+  # path: geo_location.location
+  #   source:    location.EnhancedValidate: no recognizable `if ... { errors = append(...) }` pattern - read it by hand
+  # path: capabilities.name
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: virtual_network_rule.id
+  #   source:    [from azure.ValidateResourceID] !ok
+  # path: virtual_network_rule.id
+  #   source:    [from azure.ValidateResourceID] err != nil
+  # path: mongo_server_version
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: network_acl_bypass_ids[*]
+  #   source:    [from azure.ValidateResourceID] !ok
+  # path: network_acl_bypass_ids[*]
+  #   source:    [from azure.ValidateResourceID] err != nil
+  # path: backup.type
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: backup.tier
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: backup.storage_redundancy
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: identity.type
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: identity.identity_ids[*]
+  #   source:    [from commonids.ValidateUserAssignedIdentityID] !ok
+  # path: identity.identity_ids[*]
+  #   source:    [from commonids.ValidateUserAssignedIdentityID] err != nil
+  # path: cors_rule.allowed_origins[*]
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: cors_rule.exposed_headers[*]
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: cors_rule.allowed_headers[*]
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: cors_rule.allowed_methods[*]
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: cors_rule.max_age_in_seconds
+  #   source:    validation.IntBetween(1, math.MaxInt32) - bound(s) not a literal int (e.g. a named constant like math.MaxInt32) - resolve manually
+  # path: restore.source_cosmosdb_account_id
+  #   source:    [from restorables.ValidateRestorableDatabaseAccountID] !ok
+  # path: restore.source_cosmosdb_account_id
+  #   source:    [from restorables.ValidateRestorableDatabaseAccountID] err != nil
+  # path: restore.restore_timestamp_in_utc
+  #   source:    validation.IsRFC3339Time(...) - no translation rule yet, add one
+  # path: restore.gremlin_database.name
+  #   source:    [from validate.CosmosEntityName] len(value) < 1 || len(value) > 255
+  # path: restore.gremlin_database.graph_names[*]
+  #   source:    [from validate.CosmosEntityName] len(value) < 1 || len(value) > 255
+  # path: restore.tables_to_restore[*]
+  #   source:    [from validate.CosmosEntityName] len(value) < 1 || len(value) > 255
+  # path: tags
+  #   condition: length(value) <= 50
+  #   message:   [from tags.Validate: invalid when len(value) > 50]
+  #   source:    [from tags.Validate: invalid when len(value) > 50]
+  # path: tags
+  #   condition: length(value) <= 512
+  #   message:   [from tags.Validate: invalid when len(value) > 512]
+  #   source:    [from tags.Validate: invalid when len(value) > 512]
+  # path: tags
+  #   source:    [from tags.Validate] err != nil
+  # path: tags
+  #   condition: length(value) <= 256
+  #   message:   [from tags.Validate: invalid when len(value) > 256]
+  #   source:    [from tags.Validate: invalid when len(value) > 256]
 }
 

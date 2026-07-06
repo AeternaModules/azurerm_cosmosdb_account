@@ -12,6 +12,7 @@ resource "azurerm_cosmosdb_account" "cosmosdb_accounts" {
   mongo_server_version                  = each.value.mongo_server_version
   minimal_tls_version                   = each.value.minimal_tls_version
   managed_hsm_key_id                    = each.value.managed_hsm_key_id
+  local_authentication_enabled          = each.value.local_authentication_enabled
   local_authentication_disabled         = each.value.local_authentication_disabled
   kind                                  = each.value.kind
   is_virtual_network_filter_enabled     = each.value.is_virtual_network_filter_enabled
