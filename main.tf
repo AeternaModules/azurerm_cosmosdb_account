@@ -34,10 +34,13 @@ resource "azurerm_cosmosdb_account" "cosmosdb_accounts" {
     max_staleness_prefix    = each.value.consistency_policy.max_staleness_prefix
   }
 
-  geo_location {
-    failover_priority = each.value.geo_location.failover_priority
-    location          = each.value.geo_location.location
-    zone_redundant    = each.value.geo_location.zone_redundant
+  dynamic "geo_location" {
+    for_each = each.value.geo_location
+    content {
+      failover_priority = geo_location.value.failover_priority
+      location          = geo_location.value.location
+      zone_redundant    = geo_location.value.zone_redundant
+    }
   }
 
   dynamic "analytical_storage" {
@@ -59,7 +62,7 @@ resource "azurerm_cosmosdb_account" "cosmosdb_accounts" {
   }
 
   dynamic "capabilities" {
-    for_each = each.value.capabilities != null ? [each.value.capabilities] : []
+    for_each = each.value.capabilities != null ? each.value.capabilities : []
     content {
       name = capabilities.value.name
     }
@@ -95,14 +98,14 @@ resource "azurerm_cosmosdb_account" "cosmosdb_accounts" {
     for_each = each.value.restore != null ? [each.value.restore] : []
     content {
       dynamic "database" {
-        for_each = restore.value.database != null ? [restore.value.database] : []
+        for_each = restore.value.database != null ? restore.value.database : []
         content {
           collection_names = database.value.collection_names
           name             = database.value.name
         }
       }
       dynamic "gremlin_database" {
-        for_each = restore.value.gremlin_database != null ? [restore.value.gremlin_database] : []
+        for_each = restore.value.gremlin_database != null ? restore.value.gremlin_database : []
         content {
           graph_names = gremlin_database.value.graph_names
           name        = gremlin_database.value.name
@@ -115,7 +118,7 @@ resource "azurerm_cosmosdb_account" "cosmosdb_accounts" {
   }
 
   dynamic "virtual_network_rule" {
-    for_each = each.value.virtual_network_rule != null ? [each.value.virtual_network_rule] : []
+    for_each = each.value.virtual_network_rule != null ? each.value.virtual_network_rule : []
     content {
       id                                   = virtual_network_rule.value.id
       ignore_missing_vnet_service_endpoint = virtual_network_rule.value.ignore_missing_vnet_service_endpoint

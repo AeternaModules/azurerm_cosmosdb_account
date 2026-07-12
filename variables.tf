@@ -105,11 +105,11 @@ EOT
       max_interval_in_seconds = optional(number) # Default: 5
       max_staleness_prefix    = optional(number) # Default: 100
     })
-    geo_location = object({
+    geo_location = list(object({
       failover_priority = number
       location          = string
       zone_redundant    = optional(bool) # Default: false
-    })
+    }))
     analytical_storage = optional(object({
       schema_type = string
     }))
@@ -120,9 +120,9 @@ EOT
       tier                = optional(string)
       type                = string
     }))
-    capabilities = optional(object({
+    capabilities = optional(list(object({
       name = string
-    }))
+    })))
     capacity = optional(object({
       total_throughput_limit = number
     }))
@@ -138,91 +138,30 @@ EOT
       type         = string
     }))
     restore = optional(object({
-      database = optional(object({
+      database = optional(list(object({
         collection_names = optional(set(string))
         name             = string
-      }))
-      gremlin_database = optional(object({
+      })))
+      gremlin_database = optional(list(object({
         graph_names = optional(list(string))
         name        = string
-      }))
+      })))
       restore_timestamp_in_utc   = string
       source_cosmosdb_account_id = string
       tables_to_restore          = optional(list(string))
     }))
-    virtual_network_rule = optional(object({
+    virtual_network_rule = optional(list(object({
       id                                   = string
       ignore_missing_vnet_service_endpoint = optional(bool) # Default: false
-    }))
+    })))
   }))
-  validation {
-    condition = alltrue([
-      for k, v in var.cosmosdb_accounts : (
-        can(regex("^[-a-z0-9]{3,50}$", v.name))
-      )
-    ])
-    error_message = "Cosmos DB Account name must be 3 - 50 characters long, contain only lowercase letters, numbers and hyphens."
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.cosmosdb_accounts : (
-        v.capacity == null || (v.capacity.total_throughput_limit >= -1)
-      )
-    ])
-    error_message = "must be at least -1"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.cosmosdb_accounts : (
-        v.consistency_policy.max_interval_in_seconds == null || (v.consistency_policy.max_interval_in_seconds >= 5 && v.consistency_policy.max_interval_in_seconds <= 86400)
-      )
-    ])
-    error_message = "must be between 5 and 86400"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.cosmosdb_accounts : (
-        v.geo_location.failover_priority >= 0
-      )
-    ])
-    error_message = "must be at least 0"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.cosmosdb_accounts : (
-        v.backup == null || (v.backup.interval_in_minutes == null || (v.backup.interval_in_minutes >= 60 && v.backup.interval_in_minutes <= 1440))
-      )
-    ])
-    error_message = "must be between 60 and 1440"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.cosmosdb_accounts : (
-        v.backup == null || (v.backup.retention_in_hours == null || (v.backup.retention_in_hours >= 8 && v.backup.retention_in_hours <= 720))
-      )
-    ])
-    error_message = "must be between 8 and 720"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.cosmosdb_accounts : (
-        v.restore == null || (v.restore.database == null || (length(v.restore.database.name) > 0))
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.cosmosdb_accounts : (
-        v.restore == null || (v.restore.database == null || (v.restore.database.collection_names == null || (length(v.restore.database.collection_names) > 0)))
-      )
-    ])
-    error_message = "must not be empty"
-  }
   # --- Unconfirmed validation candidates, derived from azurerm_cosmosdb_account's provider source ---
   # Not auto-enabled: either a bespoke provider validator we can't safely translate,
   # or a path that crosses a list-typed block (needs its own for_each wrapping).
   # Review, translate into a real validation{} block above, and delete once confirmed.
+  # path: name
+  #   condition: can(regex("^[-a-z0-9]{3,50}$", value))
+  #   message:   Cosmos DB Account name must be 3 - 50 characters long, contain only lowercase letters, numbers and hyphens.
   # path: location
   #   source:    location.EnhancedValidate: no recognizable `if ... { errors = append(...) }` pattern - read it by hand
   # path: resource_group_name
@@ -243,6 +182,9 @@ EOT
   #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
   # path: analytical_storage.schema_type
   #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: capacity.total_throughput_limit
+  #   condition: value >= -1
+  #   message:   must be at least -1
   # path: minimal_tls_version
   #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
   # path: create_mode
@@ -259,10 +201,16 @@ EOT
   #   source:    [from keyvault.ValidateNestedItemID] err != nil
   # path: consistency_policy.consistency_level
   #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: consistency_policy.max_interval_in_seconds
+  #   condition: value >= 5 && value <= 86400
+  #   message:   must be between 5 and 86400
   # path: consistency_policy.max_staleness_prefix
   #   source:    validation.IntBetween(10, math.MaxInt32) - bound(s) not a literal int (e.g. a named constant like math.MaxInt32) - resolve manually
   # path: geo_location.location
   #   source:    location.EnhancedValidate: no recognizable `if ... { errors = append(...) }` pattern - read it by hand
+  # path: geo_location.failover_priority
+  #   condition: value >= 0
+  #   message:   must be at least 0
   # path: capabilities.name
   #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
   # path: virtual_network_rule.id
@@ -279,6 +227,12 @@ EOT
   #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
   # path: backup.tier
   #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: backup.interval_in_minutes
+  #   condition: value >= 60 && value <= 1440
+  #   message:   must be between 60 and 1440
+  # path: backup.retention_in_hours
+  #   condition: value >= 8 && value <= 720
+  #   message:   must be between 8 and 720
   # path: backup.storage_redundancy
   #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
   # path: identity.type
@@ -306,6 +260,12 @@ EOT
   #   source:    [from restorables.ValidateRestorableDatabaseAccountID] err != nil
   # path: restore.restore_timestamp_in_utc
   #   source:    validation.IsRFC3339Time(...) - no translation rule yet, add one
+  # path: restore.database.name
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: restore.database.collection_names[*]
+  #   condition: length(value) > 0
+  #   message:   must not be empty
   # path: restore.gremlin_database.name
   #   source:    [from validate.CosmosEntityName] len(value) < 1 || len(value) > 255
   # path: restore.gremlin_database.graph_names[*]
