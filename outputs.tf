@@ -1,3 +1,7 @@
+output "cosmosdb_accounts_id" {
+  description = "Map of id values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
+  value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => v.id }
+}
 output "cosmosdb_accounts_access_key_metadata_writes_enabled" {
   description = "Map of access_key_metadata_writes_enabled values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
   value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => v.access_key_metadata_writes_enabled }
