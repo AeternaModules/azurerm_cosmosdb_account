@@ -78,37 +78,37 @@ EOT
     name                                  = string
     offer_type                            = string
     resource_group_name                   = string
-    partition_merge_enabled               = optional(bool) # Default: false
+    partition_merge_enabled               = optional(bool)
     network_acl_bypass_ids                = optional(list(string))
-    network_acl_bypass_for_azure_services = optional(bool) # Default: false
-    multiple_write_locations_enabled      = optional(bool) # Default: false
+    network_acl_bypass_for_azure_services = optional(bool)
+    multiple_write_locations_enabled      = optional(bool)
     mongo_server_version                  = optional(string)
-    minimal_tls_version                   = optional(string) # Default: "Tls12"
+    minimal_tls_version                   = optional(string)
     managed_hsm_key_id                    = optional(string)
     local_authentication_enabled          = optional(bool)
     local_authentication_disabled         = optional(bool)
-    kind                                  = optional(string) # Default: "GlobalDocumentDB"
-    is_virtual_network_filter_enabled     = optional(bool)   # Default: false
-    public_network_access_enabled         = optional(bool)   # Default: true
+    kind                                  = optional(string)
+    is_virtual_network_filter_enabled     = optional(bool)
+    public_network_access_enabled         = optional(bool)
     ip_range_filter                       = optional(set(string))
-    free_tier_enabled                     = optional(bool)   # Default: false
-    default_identity_type                 = optional(string) # Default: "FirstPartyIdentity"
+    free_tier_enabled                     = optional(bool)
+    default_identity_type                 = optional(string)
     create_mode                           = optional(string)
-    burst_capacity_enabled                = optional(bool) # Default: false
-    automatic_failover_enabled            = optional(bool) # Default: false
-    analytical_storage_enabled            = optional(bool) # Default: false
-    access_key_metadata_writes_enabled    = optional(bool) # Default: true
+    burst_capacity_enabled                = optional(bool)
+    automatic_failover_enabled            = optional(bool)
+    analytical_storage_enabled            = optional(bool)
+    access_key_metadata_writes_enabled    = optional(bool)
     key_vault_key_id                      = optional(string)
     tags                                  = optional(map(string))
     consistency_policy = object({
       consistency_level       = string
-      max_interval_in_seconds = optional(number) # Default: 5
-      max_staleness_prefix    = optional(number) # Default: 100
+      max_interval_in_seconds = optional(number)
+      max_staleness_prefix    = optional(number)
     })
     geo_location = list(object({
       failover_priority = number
       location          = string
-      zone_redundant    = optional(bool) # Default: false
+      zone_redundant    = optional(bool)
     }))
     analytical_storage = optional(object({
       schema_type = string
@@ -152,9 +152,17 @@ EOT
     }))
     virtual_network_rule = optional(list(object({
       id                                   = string
-      ignore_missing_vnet_service_endpoint = optional(bool) # Default: false
+      ignore_missing_vnet_service_endpoint = optional(bool)
     })))
   }))
+  validation {
+    condition = alltrue([
+      for k, v in var.cosmosdb_accounts : (
+        length(v.geo_location) >= 1
+      )
+    ])
+    error_message = "Each geo_location list must contain at least 1 items"
+  }
   # --- Unconfirmed validation candidates, derived from azurerm_cosmosdb_account's provider source ---
   # Not auto-enabled: either a bespoke provider validator we can't safely translate,
   # or a path that crosses a list-typed block (needs its own for_each wrapping).
