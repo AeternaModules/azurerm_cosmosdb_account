@@ -11,13 +11,11 @@ resource "azurerm_cosmosdb_account" "cosmosdb_accounts" {
   multiple_write_locations_enabled      = each.value.multiple_write_locations_enabled
   mongo_server_version                  = each.value.mongo_server_version
   minimal_tls_version                   = each.value.minimal_tls_version
-  managed_hsm_key_id                    = each.value.managed_hsm_key_id
   local_authentication_enabled          = each.value.local_authentication_enabled
-  local_authentication_disabled         = each.value.local_authentication_disabled
   kind                                  = each.value.kind
-  is_virtual_network_filter_enabled     = each.value.is_virtual_network_filter_enabled
-  public_network_access_enabled         = each.value.public_network_access_enabled
+  key_vault_key_id                      = each.value.key_vault_key_id
   ip_range_filter                       = each.value.ip_range_filter
+  public_network_access_enabled         = each.value.public_network_access_enabled
   free_tier_enabled                     = each.value.free_tier_enabled
   default_identity_type                 = each.value.default_identity_type
   create_mode                           = each.value.create_mode
@@ -25,7 +23,7 @@ resource "azurerm_cosmosdb_account" "cosmosdb_accounts" {
   automatic_failover_enabled            = each.value.automatic_failover_enabled
   analytical_storage_enabled            = each.value.analytical_storage_enabled
   access_key_metadata_writes_enabled    = each.value.access_key_metadata_writes_enabled
-  key_vault_key_id                      = each.value.key_vault_key_id
+  is_virtual_network_filter_enabled     = each.value.is_virtual_network_filter_enabled
   tags                                  = each.value.tags
 
   consistency_policy {

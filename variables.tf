@@ -26,9 +26,7 @@ Optional:
     - is_virtual_network_filter_enabled
     - key_vault_key_id
     - kind
-    - local_authentication_disabled
     - local_authentication_enabled
-    - managed_hsm_key_id
     - minimal_tls_version
     - mongo_server_version
     - multiple_write_locations_enabled
@@ -84,13 +82,11 @@ EOT
     multiple_write_locations_enabled      = optional(bool)
     mongo_server_version                  = optional(string)
     minimal_tls_version                   = optional(string)
-    managed_hsm_key_id                    = optional(string)
     local_authentication_enabled          = optional(bool)
-    local_authentication_disabled         = optional(bool)
     kind                                  = optional(string)
-    is_virtual_network_filter_enabled     = optional(bool)
-    public_network_access_enabled         = optional(bool)
+    key_vault_key_id                      = optional(string)
     ip_range_filter                       = optional(set(string))
+    public_network_access_enabled         = optional(bool)
     free_tier_enabled                     = optional(bool)
     default_identity_type                 = optional(string)
     create_mode                           = optional(string)
@@ -98,7 +94,7 @@ EOT
     automatic_failover_enabled            = optional(bool)
     analytical_storage_enabled            = optional(bool)
     access_key_metadata_writes_enabled    = optional(bool)
-    key_vault_key_id                      = optional(string)
+    is_virtual_network_filter_enabled     = optional(bool)
     tags                                  = optional(map(string))
     consistency_policy = object({
       consistency_level       = string

@@ -82,10 +82,6 @@ output "cosmosdb_accounts_kind" {
   description = "Map of kind values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
   value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => v.kind if v.kind != null && length(v.kind) > 0 }
 }
-output "cosmosdb_accounts_local_authentication_disabled" {
-  description = "Map of local_authentication_disabled values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
-  value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => v.local_authentication_disabled if v.local_authentication_disabled != null }
-}
 output "cosmosdb_accounts_local_authentication_enabled" {
   description = "Map of local_authentication_enabled values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
   value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => v.local_authentication_enabled if v.local_authentication_enabled != null }
@@ -93,10 +89,6 @@ output "cosmosdb_accounts_local_authentication_enabled" {
 output "cosmosdb_accounts_location" {
   description = "Map of location values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
   value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => v.location if v.location != null && length(v.location) > 0 }
-}
-output "cosmosdb_accounts_managed_hsm_key_id" {
-  description = "Map of managed_hsm_key_id values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
-  value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => v.managed_hsm_key_id if v.managed_hsm_key_id != null && length(v.managed_hsm_key_id) > 0 }
 }
 output "cosmosdb_accounts_minimal_tls_version" {
   description = "Map of minimal_tls_version values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
