@@ -8,7 +8,7 @@ output "cosmosdb_accounts_access_key_metadata_writes_enabled" {
 }
 output "cosmosdb_accounts_analytical_storage" {
   description = "Map of analytical_storage values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
-  value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => v.analytical_storage if v.analytical_storage != null && length(v.analytical_storage) > 0 }
+  value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => one(v.analytical_storage) if v.analytical_storage != null && length(v.analytical_storage) > 0 }
 }
 output "cosmosdb_accounts_analytical_storage_enabled" {
   description = "Map of analytical_storage_enabled values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
@@ -20,7 +20,7 @@ output "cosmosdb_accounts_automatic_failover_enabled" {
 }
 output "cosmosdb_accounts_backup" {
   description = "Map of backup values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
-  value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => v.backup if v.backup != null && length(v.backup) > 0 }
+  value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => one(v.backup) if v.backup != null && length(v.backup) > 0 }
 }
 output "cosmosdb_accounts_burst_capacity_enabled" {
   description = "Map of burst_capacity_enabled values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
@@ -32,15 +32,15 @@ output "cosmosdb_accounts_capabilities" {
 }
 output "cosmosdb_accounts_capacity" {
   description = "Map of capacity values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
-  value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => v.capacity if v.capacity != null && length(v.capacity) > 0 }
+  value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => one(v.capacity) if v.capacity != null && length(v.capacity) > 0 }
 }
 output "cosmosdb_accounts_consistency_policy" {
   description = "Map of consistency_policy values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
-  value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => v.consistency_policy if v.consistency_policy != null && length(v.consistency_policy) > 0 }
+  value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => one(v.consistency_policy) if v.consistency_policy != null && length(v.consistency_policy) > 0 }
 }
 output "cosmosdb_accounts_cors_rule" {
   description = "Map of cors_rule values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
-  value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => v.cors_rule if v.cors_rule != null && length(v.cors_rule) > 0 }
+  value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => one(v.cors_rule) if v.cors_rule != null && length(v.cors_rule) > 0 }
 }
 output "cosmosdb_accounts_create_mode" {
   description = "Map of create_mode values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
@@ -64,7 +64,7 @@ output "cosmosdb_accounts_geo_location" {
 }
 output "cosmosdb_accounts_identity" {
   description = "Map of identity values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
-  value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => v.identity if v.identity != null && length(v.identity) > 0 }
+  value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => one(v.identity) if v.identity != null && length(v.identity) > 0 }
 }
 output "cosmosdb_accounts_ip_range_filter" {
   description = "Map of ip_range_filter values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
@@ -166,7 +166,7 @@ output "cosmosdb_accounts_resource_group_name" {
 }
 output "cosmosdb_accounts_restore" {
   description = "Map of restore values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
-  value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => v.restore if v.restore != null && length(v.restore) > 0 }
+  value       = { for k, v in azurerm_cosmosdb_account.cosmosdb_accounts : k => one(v.restore) if v.restore != null && length(v.restore) > 0 }
 }
 output "cosmosdb_accounts_secondary_key" {
   description = "Map of secondary_key values across all cosmosdb_accounts, keyed the same as var.cosmosdb_accounts"
